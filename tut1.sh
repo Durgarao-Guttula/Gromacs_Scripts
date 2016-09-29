@@ -3,7 +3,7 @@ filename="1AKI"
 #Load the gromacs
 module load gromacs/5.1.3
 #convert the pdb file to gromacs file, mention the forcefield to be used and the water model
-gmx pdb2gmx -f $filename".pdb" -o $filename"_processed.gro" -water spce < ff.txt
+echo "15" | gmx pdb2gmx -f $filename".pdb" -o $filename"_processed.gro" -water spce #15 is OPLS-AA/L potential
 echo "pdb file processed"
 #defining the box of the system, both the shape and dimension around the protein
 gmx editconf -f $filename"_processed.gro" -o $filename"_newbox.gro" -c -d 1.0 -bt cubic
@@ -19,14 +19,14 @@ q=$(grep " qtot" topol.top | tail -n 1 | awk '{print $NF}')
 echo "q = $q"
 if [ $q -gt 0 ]
 then 
-    gmx genion -s ions.tpr -o $filename"_solv_ions.gro" -p topol.top -pname NA -nname CL -nn $q < sol.txt
+    echo "SOL" | gmx genion -s ions.tpr -o $filename"_solv_ions.gro" -p topol.top -pname NA -nname CL -nn $q 
     echo "ions added"
 fi
 
 if [$q -lt 0 ]
 then
     q=`expr $q \* -1`
-    gmx genion -s ions.tpr -o $filename"_solv_ions.gro" -p topol.top -pname NA -nname CL -np $q
+    echo "SOL" | gmx genion -s ions.tpr -o $filename"_solv_ions.gro" -p topol.top -pname NA -nname CL -np $q
     echo "ions added"
 fi
 
@@ -35,21 +35,21 @@ gmx grompp -f minim.mdp -c $filename"_solv_ions.gro" -p topol.top -o em.tpr
 gmx_mpi mdrun -v -deffnm em
 echo "Energy minization done"
 #Generate potentital energy graph
-gmx energy -f em.edr -o potential.xvg < pot.txt #how to choose using scripting
+echo "10 0" | gmx energy -f em.edr -o potential.xvg #how to choose using scripting
 
 #NVT ensemble
 gmx grompp -f nvt.mdp -c em.gro -p topol.top -o nvt.tpr
 gmx_mpi mdrun -deffnm nvt
 echo " NVT done"
 #generate temperature profile
-gmx energy -f nvt.edr -o temperature.xvg < temp.txt
+echo "15 0" | gmx energy -f nvt.edr -o temperature.xvg 
 
 #NPT ensemble
 gmx grompp -f npt.mdp -c nvt.gro -t nvt.cpt -p topol.top -o npt.tpr
 gmx_mpi mdrun -deffnm npt
 #generate the pressure and density graph
-gmx energy -f npt.edr -o pressure.xvg < pres.txt
-gmx energy -f npt.edr -o density.xvg < dens.txt
+echo "16 0" | gmx energy -f npt.edr -o pressure.xvg
+echo "22 0" | gmx energy -f npt.edr -o density.xvg
 
 #Production MD
 gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
@@ -59,8 +59,8 @@ gmx_mpi mdrun -deffnm md_0_1
 #POST MD ANALYSIS
 gmx trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_noPBC.xtc -pbc mol -ur compact
 #RMSD
-gmx rms -s md_0_.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns < rms.txt
-gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns < rms.txt
+echo "4 4" | gmx rms -s md_0_.tpr -f md_0_1_noPBC.xtc -o rmsd.xvg -tu ns
+echo "4 4" | gmx rms -s em.tpr -f md_0_1_noPBC.xtc -o rmsd_xtal.xvg -tu ns
 #Radius of gyration
 gmx gyrate -s md_0_1.tpr -f md_0_1_noPBC.xtc -o gyrate.xvg  
 
