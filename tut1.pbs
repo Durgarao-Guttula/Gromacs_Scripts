@@ -3,7 +3,7 @@
 #PBS -l nodes=1:ppn=8
 #PBS -l pmem=200mb
 #PBS -m abe
-#PBS -M subhomoymahajan@gmail.com
+#PBS -M abcd@xyz.com
 filename="1AKI"
 cd $PBS_O_WORKDIR
 ls
