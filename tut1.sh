@@ -1,9 +1,4 @@
 #!/bin/bash
-#PBS -l walltime=48:00:00
-#PBS -l nodes=1:ppn=8
-#PBS -l pmem=200mb
-#PBS -m abe
-#PBS -M abcd@xyz.com
 filename="1AKI"
 cd $PBS_O_WORKDIR
 ls
