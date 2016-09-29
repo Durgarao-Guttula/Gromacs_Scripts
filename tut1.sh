@@ -1,7 +1,5 @@
 #!/bin/bash
 filename="1AKI"
-cd $PBS_O_WORKDIR
-ls
 #Load the gromacs
 module load gromacs/5.1.3
 #convert the pdb file to gromacs file, mention the forcefield to be used and the water model
